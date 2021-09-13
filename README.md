@@ -1,5 +1,4 @@
 # Pong
----
 My own implementation of the game ['Pong'](https://en.wikipedia.org/wiki/Pong) using the [Raylib](https://github.com/raysan5/raylib) library.
 
 ## Building
