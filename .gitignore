@@ -1,5 +1,9 @@
-.vscode
+.cache/
+.vscode/
+builds/
 bin/
 obj/
-include/ray*.h
-lib/libraylib.a
+include/
+lib/
+
+compile_commands.json
