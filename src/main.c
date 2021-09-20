@@ -51,7 +51,7 @@ typedef struct paddleEntity{
 } paddleEntity;
 
 void handlePlayerInput(paddleEntity *self);
-void updatePlayer(paddleEntity *self, const ballEntity* ball, const paddleEntity* opponent, const float dy);
+void updatePlayer(paddleEntity *self, const float dy);
 void drawPaddleEntity(paddleEntity *self);
 void updateCpu(paddleEntity *self, const ballEntity *ball, const paddleEntity *player, const float dy);
 paddleEntity createPaddleEntity(Rectangle rect, Color color);
@@ -85,7 +85,7 @@ int main()
     paddleEntity p2_paddle = createPaddleEntity(p2_rect, WHITE);
 
     ballEntity ball = {SCREEN_WIDTH/2, SCREEN_HEIGHT/2, {16, WHITE}};
-    Vector2 ball_center;
+    Vector2 ball_center = (Vector2){ball.x, ball.y};
 
     enum end_state endState;
 
@@ -124,7 +124,7 @@ int main()
 				ball.y = SCREEN_HEIGHT/2;
             }
 
-            updatePlayer(&p1_paddle, NULL, NULL, player_dy);
+            updatePlayer(&p1_paddle, player_dy);
 
             ball.x += ball_dx;
             ball.y += ball_dy;
@@ -184,7 +184,7 @@ void handlePlayerInput(paddleEntity *self)
     }
 }
 
-void updatePlayer(paddleEntity *self, const ballEntity *ball, const paddleEntity *opponent, const float dy)
+void updatePlayer(paddleEntity *self, const float dy)
 {
     switch (self->direction)
     {
