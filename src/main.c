@@ -73,6 +73,7 @@ typedef struct speeds {
 } Speeds;
 
 void handlePlayerInput(paddleEntity *self);
+void handlePlayer2Input(paddleEntity *self);
 void updatePlayer(paddleEntity *self, const float dy);
 void drawPaddleEntity(paddleEntity *self);
 void updateCpu(paddleEntity *self, const ballEntity *ball,
@@ -92,6 +93,7 @@ int main()
     Rectangle p2_rect = (Rectangle){SCREEN_WIDTH - 84,
         (float)SCREEN_HEIGHT/2 - 60, 20, 120};
     paddleEntity p2_paddle = createPaddleEntity(p2_rect, WHITE);
+    int p2_score = 0;
 
     ballEntity ball = {(float)SCREEN_WIDTH/2, (float)SCREEN_HEIGHT/2, {16, WHITE}};
     Vector2 ball_center = (Vector2){ball.x, ball.y};
@@ -111,7 +113,7 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Pong");
     SetTargetFPS(60);
 
-    char p1_scoreboard[16];
+    char p1_scoreboard[16], p2_scoreboard[16];
     bool gameOver = false;
     while(!WindowShouldClose()) {
         switch (gameMode) {
@@ -161,10 +163,51 @@ int main()
             }
             break;
         case GAMEMODE_2PLAYER:
+            handlePlayerInput(&p1_paddle);
+            handlePlayer2Input(&p2_paddle);
+            if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                        p1_paddle.rect) || CheckCollisionCircleRec(ball_center,
+                            ball.sprite.radius, p2_paddle.rect)) {
+                if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
+                        speeds.BALL_MAX_SPEED) {
+                    speeds.ball_dx *= speeds.speedup;
+                }
+                speeds.ball_dx = -speeds.ball_dx;
+            }
+
+            if (ball.y + ball.sprite.radius > SCREEN_HEIGHT ||
+                    ball.y - ball.sprite.radius < 0) {
+                speeds.ball_dy = -speeds.ball_dy;
+            }
+
+            if (ball.x - ball.sprite.radius <= 0.0) {
+                ball.x = (float)SCREEN_WIDTH/2;
+                ball.y = (float)SCREEN_HEIGHT/2;
+                p2_score++;
+            }
+
+            if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
+                ball.x = (float)SCREEN_WIDTH/2;
+                ball.y = (float)SCREEN_HEIGHT/2;
+                p1_score++;
+            }
+
+            updatePlayer(&p1_paddle,speeds.PLAYER_DY);
+            updatePlayer(&p2_paddle, speeds.PLAYER_DY);
+
+            ball.x += speeds.ball_dx;
+            ball.y += speeds.ball_dy;
+            ball_center = (Vector2){ball.x, ball.y};
+
+            sprintf(p1_scoreboard, "Score: %03d", p1_score);
+            sprintf(p2_scoreboard, "Score: %03d", p2_score);
             BeginDrawing();
             ClearBackground(BLACK);
-            DrawText("AY LMAO", SCREEN_WIDTH*0.25,
-                    (SCREEN_HEIGHT/2) - 16, 32, WHITE);
+            drawPaddleEntity(&p1_paddle);
+            drawPaddleEntity(&p2_paddle);
+            DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+            DrawText(p1_scoreboard, 10, 10, 48, WHITE);
+            DrawText(p2_scoreboard, SCREEN_WIDTH/2 + 55, 10, 48, WHITE);
             EndDrawing();
             break;
         case GAMEMODE_1P_ALTERNATIVE:
@@ -199,6 +242,17 @@ paddleEntity createPaddleEntity(Rectangle rect, Color color)
 }
 
 void handlePlayerInput(paddleEntity *self)
+{
+    if(IsKeyDown(KEY_W)) {
+        self->direction = PADDLE_UP;
+    } else if(IsKeyDown(KEY_S)) {
+        self->direction = PADDLE_DOWN;
+    } else {
+        self->direction = PADDLE_STOP;
+    }
+}
+
+void handlePlayer2Input(paddleEntity *self)
 {
     if(IsKeyDown(KEY_UP)) {
         self->direction = PADDLE_UP;
