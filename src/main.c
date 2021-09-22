@@ -211,10 +211,48 @@ int main()
             EndDrawing();
             break;
         case GAMEMODE_1P_ALTERNATIVE:
+            handlePlayerInput(&p1_paddle);
+            handlePlayer2Input(&p2_paddle);
+            if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                        p1_paddle.rect) || CheckCollisionCircleRec(ball_center,
+                            ball.sprite.radius, p2_paddle.rect)) {
+                if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
+                        speeds.BALL_MAX_SPEED) {
+                    speeds.ball_dx *= speeds.speedup;
+                }
+                speeds.ball_dx = -speeds.ball_dx;
+                p1_score++;
+            }
+
+            if (ball.y + ball.sprite.radius > SCREEN_HEIGHT ||
+                    ball.y - ball.sprite.radius < 0) {
+                speeds.ball_dy = -speeds.ball_dy;
+            }
+
+            if (ball.x - ball.sprite.radius <= 0.0) {
+                ball.x = (float)SCREEN_WIDTH/2;
+                ball.y = (float)SCREEN_HEIGHT/2;
+            }
+
+            if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
+                ball.x = (float)SCREEN_WIDTH/2;
+                ball.y = (float)SCREEN_HEIGHT/2;
+            }
+
+            updatePlayer(&p1_paddle,speeds.PLAYER_DY);
+            updatePlayer(&p2_paddle, speeds.PLAYER_DY);
+
+            ball.x += speeds.ball_dx;
+            ball.y += speeds.ball_dy;
+            ball_center = (Vector2){ball.x, ball.y};
+
+            sprintf(p1_scoreboard, "Score: %03d", p1_score);
             BeginDrawing();
             ClearBackground(BLACK);
-            DrawText("AY LMAO", SCREEN_WIDTH*0.25,
-                    (SCREEN_HEIGHT/2) - 16, 32, WHITE);
+            drawPaddleEntity(&p1_paddle);
+            drawPaddleEntity(&p2_paddle);
+            DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+            DrawText(p1_scoreboard, 10, 10, 48, WHITE);
             EndDrawing();
             break;
         case GAMEMODE_END:
@@ -225,7 +263,6 @@ int main()
             EndDrawing();
             break;
         }
-
     }
     CloseWindow();
     return 0;
