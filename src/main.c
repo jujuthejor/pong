@@ -47,13 +47,13 @@ enum EndState {
 };
 
 typedef struct circle {
-    int radius;
+    float radius;
     Color color;
 } circle;
 
 typedef struct ballEntity {
-    float x;
-    float y;
+    int x;
+    int y;
     circle sprite;
 } ballEntity;
 
@@ -68,8 +68,8 @@ typedef struct speeds {
     const float CPU_DY;
     const float BALL_MAX_SPEED;
     float speedup;
-    float ball_dx;
-    float ball_dy;
+    int ball_dx;
+    int ball_dy;
 } Speeds;
 
 void handlePlayerInput(paddleEntity *self);
@@ -91,8 +91,8 @@ int main()
     paddleEntity p2_paddle = createPaddleEntity(p2_rect, WHITE);
     int p2_score = 0;
 
-    ballEntity ball = {(float)SCREEN_WIDTH/2, (float)SCREEN_HEIGHT/2, {16, WHITE}};
-    Vector2 ball_center = (Vector2){ball.x, ball.y};
+    ballEntity ball = {SCREEN_WIDTH/2, SCREEN_HEIGHT/2, {16, WHITE}};
+    Vector2 ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
     Speeds speeds = {
         .PLAYER_DY = 5,
@@ -137,17 +137,17 @@ int main()
                 handlePlayerInput(&p1_paddle);
                 updateCpu(&p2_paddle, &ball, &p1_paddle, speeds);
 
-                if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                if(CheckCollisionCircleRec(ball_center, (float)ball.sprite.radius,
                             p1_paddle.rect) || CheckCollisionCircleRec(ball_center,
-                                ball.sprite.radius, p2_paddle.rect)) {
+                                (float)ball.sprite.radius, p2_paddle.rect)) {
                     if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
                             speeds.BALL_MAX_SPEED) {
-                        speeds.ball_dx *= speeds.speedup;
+                        speeds.ball_dx *= (int)speeds.speedup;
                     }
                     speeds.ball_dx = -speeds.ball_dx;
                 }
 
-                if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                if(CheckCollisionCircleRec(ball_center, (float)ball.sprite.radius,
                             p1_paddle.rect)) {
                     (p1_score)++;
                 }
@@ -163,22 +163,22 @@ int main()
                 }
 
                 if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
-                    ball.x = (float)SCREEN_WIDTH/2;
-                    ball.y = (float)SCREEN_HEIGHT/2;
+                    ball.x = SCREEN_WIDTH/2;
+                    ball.y = SCREEN_HEIGHT/2;
                 }
 
                 updatePlayer(&p1_paddle, speeds.PLAYER_DY);
 
                 ball.x += speeds.ball_dx;
                 ball.y += speeds.ball_dy;
-                ball_center = (Vector2){ball.x, ball.y};
+                ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
                 sprintf(p1_scoreboard, "Score: %03d", p1_score);
                 BeginDrawing();
                 ClearBackground(BLACK);
                 drawPaddleEntity(&p1_paddle);
                 drawPaddleEntity(&p2_paddle);
-                DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+                DrawCircle(ball.x, ball.y, (float)ball.sprite.radius, ball.sprite.color);
                 DrawText(p1_scoreboard, 10, 10, 48, WHITE);
                 EndDrawing();
             } else {
@@ -189,7 +189,7 @@ int main()
                 case YOU_WIN:
                     BeginDrawing();
                     ClearBackground(BLACK);
-                    DrawText("A WINNER IS YOU!", SCREEN_WIDTH*0.25,
+                    DrawText("A WINNER IS YOU!", (int)(SCREEN_WIDTH*0.25),
                             (SCREEN_HEIGHT/2) - 16, 32, WHITE);
                     EndDrawing();
                     break;
@@ -197,7 +197,7 @@ int main()
                     BeginDrawing();
                     ClearBackground(BLACK);
                     DrawText(p1_finalScore, 10, 10, 48, WHITE);
-                    DrawText("A LOSER IS YOU!", SCREEN_WIDTH*0.25,
+                    DrawText("A LOSER IS YOU!", (int)(SCREEN_WIDTH*0.25),
                             (SCREEN_HEIGHT/2) - 16, 32, WHITE);
                     EndDrawing();
                 }
@@ -211,7 +211,7 @@ int main()
                             ball.sprite.radius, p2_paddle.rect)) {
                 if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
                         speeds.BALL_MAX_SPEED) {
-                    speeds.ball_dx *= speeds.speedup;
+                    speeds.ball_dx *= (int)speeds.speedup;
                 }
                 speeds.ball_dx = -speeds.ball_dx;
             }
@@ -222,14 +222,16 @@ int main()
             }
 
             if (ball.x - ball.sprite.radius <= 0.0) {
-                ball.x = (float)SCREEN_WIDTH/2;
-                ball.y = (float)SCREEN_HEIGHT/2;
+                ball.x = SCREEN_WIDTH/2;
+                ball.y = SCREEN_HEIGHT/2;
+                speeds.ball_dx = -speeds.ball_dx;
                 p2_score++;
             }
 
             if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
-                ball.x = (float)SCREEN_WIDTH/2;
-                ball.y = (float)SCREEN_HEIGHT/2;
+                ball.x = SCREEN_WIDTH/2;
+                ball.y = SCREEN_HEIGHT/2;
+                speeds.ball_dx = -speeds.ball_dx;
                 p1_score++;
             }
 
@@ -238,7 +240,7 @@ int main()
 
             ball.x += speeds.ball_dx;
             ball.y += speeds.ball_dy;
-            ball_center = (Vector2){ball.x, ball.y};
+            ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
             sprintf(p1_scoreboard, "Score: %03d", p1_score);
             sprintf(p2_scoreboard, "Score: %03d", p2_score);
@@ -246,7 +248,7 @@ int main()
             ClearBackground(BLACK);
             drawPaddleEntity(&p1_paddle);
             drawPaddleEntity(&p2_paddle);
-            DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+            DrawCircle(ball.x, ball.y, (float)ball.sprite.radius, ball.sprite.color);
             DrawText(p1_scoreboard, 10, 10, 48, WHITE);
             DrawText(p2_scoreboard, SCREEN_WIDTH/2 + 55, 10, 48, WHITE);
             EndDrawing();
@@ -259,7 +261,7 @@ int main()
                             ball.sprite.radius, p2_paddle.rect)) {
                 if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
                         speeds.BALL_MAX_SPEED) {
-                    speeds.ball_dx *= speeds.speedup;
+                    speeds.ball_dx *= (int)speeds.speedup;
                 }
                 speeds.ball_dx = -speeds.ball_dx;
                 p1_score++;
@@ -271,13 +273,13 @@ int main()
             }
 
             if (ball.x - ball.sprite.radius <= 0.0) {
-                ball.x = (float)SCREEN_WIDTH/2;
-                ball.y = (float)SCREEN_HEIGHT/2;
+                ball.x = SCREEN_WIDTH/2;
+                ball.y = SCREEN_HEIGHT/2;
             }
 
             if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
-                ball.x = (float)SCREEN_WIDTH/2;
-                ball.y = (float)SCREEN_HEIGHT/2;
+                ball.x = SCREEN_WIDTH/2;
+                ball.y = SCREEN_HEIGHT/2;
             }
 
             updatePlayer(&p1_paddle,speeds.PLAYER_DY);
@@ -285,21 +287,21 @@ int main()
 
             ball.x += speeds.ball_dx;
             ball.y += speeds.ball_dy;
-            ball_center = (Vector2){ball.x, ball.y};
+            ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
             sprintf(p1_scoreboard, "Score: %03d", p1_score);
             BeginDrawing();
             ClearBackground(BLACK);
             drawPaddleEntity(&p1_paddle);
             drawPaddleEntity(&p2_paddle);
-            DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+            DrawCircle(ball.x, ball.y, (float)ball.sprite.radius, ball.sprite.color);
             DrawText(p1_scoreboard, 10, 10, 48, WHITE);
             EndDrawing();
             break;
         case GAMEMODE_END:
             BeginDrawing();
             ClearBackground(BLACK);
-            DrawText("AY LMAO", SCREEN_WIDTH*0.25,
+            DrawText("AY LMAO", (int)(SCREEN_WIDTH*0.25),
                     (SCREEN_HEIGHT/2) - 16, 32, WHITE);
             EndDrawing();
             break;
@@ -373,7 +375,7 @@ void drawPaddleEntity(paddleEntity *self)
 void updateCpu(paddleEntity *self, const ballEntity *ball,
         const paddleEntity *player, Speeds speeds)
 {
-    int paddleDistance = self->rect.x - (2 * (player->rect.x + player->rect.width));    // line between sides facing each other
+    float paddleDistance = self->rect.x - (2 * (player->rect.x + player->rect.width));    // line between sides facing each other
     if(ball->x > paddleDistance * 0.66) {
         if(self->rect.y - speeds.CPU_DY >= 0)
         {
