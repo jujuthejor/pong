@@ -80,10 +80,6 @@ void updateCpu(paddleEntity *self, const ballEntity *ball,
         const paddleEntity *player, Speeds speeds);
 paddleEntity createPaddleEntity(Rectangle rect, Color color);
 
-void run_1P_mode(paddleEntity *p1_paddle, paddleEntity *p2_paddle,
-        ballEntity *ball, Vector2 *ball_center, Speeds *speeds,
-        int *p1_score, char p1_scoreboard[], bool *gameOver, enum EndState *endState);
-
 int main()
 {
     Rectangle p1_rect = (Rectangle){64, (float)SCREEN_HEIGHT/2 - 60, 20, 120};
@@ -138,8 +134,53 @@ int main()
             break;
         case GAMEMODE_1PLAYER:
             if (!gameOver) {
-                run_1P_mode(&p1_paddle, &p2_paddle, &ball, &ball_center, &speeds,
-                        &p1_score, p1_scoreboard, &gameOver, &endState);
+                handlePlayerInput(&p1_paddle);
+                updateCpu(&p2_paddle, &ball, &p1_paddle, speeds);
+
+                if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                            p1_paddle.rect) || CheckCollisionCircleRec(ball_center,
+                                ball.sprite.radius, p2_paddle.rect)) {
+                    if(speeds.ball_dx * speeds.ball_dx < speeds.BALL_MAX_SPEED *
+                            speeds.BALL_MAX_SPEED) {
+                        speeds.ball_dx *= speeds.speedup;
+                    }
+                    speeds.ball_dx = -speeds.ball_dx;
+                }
+
+                if(CheckCollisionCircleRec(ball_center, ball.sprite.radius,
+                            p1_paddle.rect)) {
+                    (p1_score)++;
+                }
+
+                if (ball.y + ball.sprite.radius > SCREEN_HEIGHT ||
+                        ball.y - ball.sprite.radius < 0) {
+                    speeds.ball_dy = -speeds.ball_dy;
+                }
+
+                if (ball.x - ball.sprite.radius <= 0.0) {
+                    gameOver = true;
+                    endState = YOU_LOSE;
+                }
+
+                if (ball.x + ball.sprite.radius >= SCREEN_WIDTH) {
+                    ball.x = (float)SCREEN_WIDTH/2;
+                    ball.y = (float)SCREEN_HEIGHT/2;
+                }
+
+                updatePlayer(&p1_paddle, speeds.PLAYER_DY);
+
+                ball.x += speeds.ball_dx;
+                ball.y += speeds.ball_dy;
+                ball_center = (Vector2){ball.x, ball.y};
+
+                sprintf(p1_scoreboard, "Score: %03d", p1_score);
+                BeginDrawing();
+                ClearBackground(BLACK);
+                drawPaddleEntity(&p1_paddle);
+                drawPaddleEntity(&p2_paddle);
+                DrawCircle(ball.x, ball.y, ball.sprite.radius, ball.sprite.color);
+                DrawText(p1_scoreboard, 10, 10, 48, WHITE);
+                EndDrawing();
             } else {
                 char p1_finalScore[16];
                 sprintf(p1_finalScore, "Score: %03d", p1_score);
@@ -348,58 +389,4 @@ void updateCpu(paddleEntity *self, const ballEntity *ball,
             }
         }
     }
-}
-
-void run_1P_mode(paddleEntity *p1_paddle, paddleEntity *p2_paddle,
-        ballEntity *ball, Vector2 *ball_center, Speeds *speeds,
-        int *p1_score, char p1_scoreboard[], bool *gameOver,
-        enum EndState *endState)
-{
-        handlePlayerInput(p1_paddle);
-        updateCpu(p2_paddle, ball, p1_paddle, *speeds);
-
-        if(CheckCollisionCircleRec(*ball_center, ball->sprite.radius,
-                    p1_paddle->rect) || CheckCollisionCircleRec(*ball_center,
-                        ball->sprite.radius, p2_paddle->rect)) {
-            if(speeds->ball_dx * speeds->ball_dx < speeds->BALL_MAX_SPEED *
-                    speeds->BALL_MAX_SPEED) {
-                speeds->ball_dx *= speeds->speedup;
-            }
-            speeds->ball_dx = -speeds->ball_dx;
-        }
-
-        if(CheckCollisionCircleRec(*ball_center, ball->sprite.radius,
-                    p1_paddle->rect)) {
-            (*p1_score)++;
-        }
-
-        if (ball->y + ball->sprite.radius > SCREEN_HEIGHT ||
-                ball->y - ball->sprite.radius < 0) {
-            speeds->ball_dy = -speeds->ball_dy;
-        }
-
-        if (ball->x - ball->sprite.radius <= 0.0) {
-            *gameOver = true;
-            *endState = YOU_LOSE;
-        }
-
-        if (ball->x + ball->sprite.radius >= SCREEN_WIDTH) {
-            ball->x = (float)SCREEN_WIDTH/2;
-            ball->y = (float)SCREEN_HEIGHT/2;
-        }
-
-        updatePlayer(p1_paddle, speeds->PLAYER_DY);
-
-        ball->x += speeds->ball_dx;
-        ball->y += speeds->ball_dy;
-        *ball_center = (Vector2){ball->x, ball->y};
-
-        sprintf(p1_scoreboard, "Score: %03d", *p1_score);
-        BeginDrawing();
-        ClearBackground(BLACK);
-        drawPaddleEntity(p1_paddle);
-        drawPaddleEntity(p2_paddle);
-        DrawCircle(ball->x, ball->y, ball->sprite.radius, ball->sprite.color);
-        DrawText(p1_scoreboard, 10, 10, 48, WHITE);
-        EndDrawing();
 }
