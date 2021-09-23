@@ -173,7 +173,7 @@ int main()
                 ball.y += speeds.ball_dy;
                 ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
-                sprintf(p1_scoreboard, "Score: %03d", p1_score);
+                snprintf(p1_scoreboard, sizeof(p1_scoreboard), "Score: %03d", p1_score);
                 BeginDrawing();
                 ClearBackground(BLACK);
                 drawPaddleEntity(&p1_paddle);
@@ -183,7 +183,7 @@ int main()
                 EndDrawing();
             } else {
                 char p1_finalScore[16];
-                sprintf(p1_finalScore, "Score: %03d", p1_score);
+                snprintf(p1_finalScore, sizeof(p1_finalScore), "Score: %03d", p1_score);
                 switch (endState)
                 {
                 case YOU_WIN:
@@ -242,8 +242,8 @@ int main()
             ball.y += speeds.ball_dy;
             ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
-            sprintf(p1_scoreboard, "Score: %03d", p1_score);
-            sprintf(p2_scoreboard, "Score: %03d", p2_score);
+            snprintf(p1_scoreboard, sizeof(p1_scoreboard), "Score: %03d", p1_score);
+            snprintf(p2_scoreboard, sizeof(p2_scoreboard), "Score: %03d", p2_score);
             BeginDrawing();
             ClearBackground(BLACK);
             drawPaddleEntity(&p1_paddle);
@@ -289,7 +289,7 @@ int main()
             ball.y += speeds.ball_dy;
             ball_center = (Vector2){(float)ball.x, (float)ball.y};
 
-            sprintf(p1_scoreboard, "Score: %03d", p1_score);
+            snprintf(p1_scoreboard, sizeof(p1_scoreboard), "Score: %03d", p1_score);
             BeginDrawing();
             ClearBackground(BLACK);
             drawPaddleEntity(&p1_paddle);
